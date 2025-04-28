@@ -6,9 +6,11 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   GoogleAuthProvider, 
+  GithubAuthProvider,
   signInWithPopup,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendPasswordResetEmail
 } from "firebase/auth";
 
 // IMPORTANT: Replace this with the configuration from your Firebase console
@@ -26,7 +28,7 @@ const firebaseConfig = {
 // Log the Firebase configuration for debugging
 console.log('Firebase Config:', firebaseConfig);
 
-let app, db, auth, googleProvider;
+let app, db, auth, googleProvider, githubProvider;
 
 try {
   // Initialize Firebase
@@ -37,6 +39,7 @@ try {
   db = getFirestore(app);
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
+  githubProvider = new GithubAuthProvider();
   
   // Log success
   console.log('Firebase services initialized successfully');
@@ -59,12 +62,14 @@ const isUserLoggedIn = () => {
 export { 
   db, 
   auth, 
-  googleProvider, 
+  googleProvider,
+  githubProvider,
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signInWithPopup,
   signOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   getCurrentUser,
   isUserLoggedIn,
   doc,
@@ -74,5 +79,6 @@ export {
   collection,
   query,
   where,
-  getDocs
+  getDocs,
+  GithubAuthProvider
 };

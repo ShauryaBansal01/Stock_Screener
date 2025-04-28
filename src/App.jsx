@@ -7,6 +7,7 @@ import WatchList from './pages/Watchlist';
 import Login from './components/Auth/Login';
 import GlobalStockNewsApp from './pages/alert';
 import Signup from './components/Auth/Signup';
+import ForgotPassword from './components/Auth/ForgotPassword';
 import { AuthProvider } from './Auth/AuthContext';
 import ProtectedRoute from './Auth/ProtectedRoute';
 
@@ -20,6 +21,7 @@ const App = () => {
             <Route path="/" element={<HeroSection />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             
             {/* Protected routes */}
             <Route 

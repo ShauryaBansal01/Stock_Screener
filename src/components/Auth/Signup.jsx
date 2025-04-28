@@ -41,7 +41,7 @@ export default function Signup() {
       });
       
       console.log('Signup successful');
-      navigate('/dashboard'); // Redirect to dashboard after successful signup
+      navigate('/'); // Redirect to home page after successful signup
     } catch (error) {
       console.error('Signup error:', error);
       // Display more detailed error information
@@ -72,7 +72,7 @@ export default function Signup() {
       }
       
       console.log('Google signup successful');
-      navigate('/dashboard'); // Redirect to dashboard after successful signup
+      navigate('/'); // Redirect to home page after successful signup
     } catch (error) {
       console.error('Google signup error:', error);
       // Display more detailed error information

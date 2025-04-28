@@ -19,7 +19,7 @@
       try {
         await signInWithEmailAndPassword(auth, email, password);
         console.log('Login successful');
-        navigate('/dashboard'); // Redirect to dashboard after successful login
+        navigate('/'); // Redirect to home page after successful login
       } catch (error) {
         console.error('Login error:', error);
         // Display more detailed error information
@@ -37,7 +37,7 @@
         console.log('Attempting Google sign-in...');
         await signInWithPopup(auth, googleProvider);
         console.log('Google login successful');
-        navigate('/dashboard'); // Redirect to dashboard after successful login
+        navigate('/'); // Redirect to home page after successful login
       } catch (error) {
         console.error('Google login error:', error);
         // Display more detailed error information
@@ -152,9 +152,9 @@
                   Remember me
                 </label>
               </div>
-              <a href="#" className="text-sm font-medium text-purple-600 hover:text-purple-500">
+              <Link to="/forgot-password" className="text-sm font-medium text-purple-600 hover:text-purple-500">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <div>
