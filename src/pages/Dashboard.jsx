@@ -2,74 +2,55 @@ import { useState, useEffect } from 'react';
 import { 
     TrendingUp, TrendingDown, BarChart2, ArrowRight, ArrowLeft,
     Briefcase, PieChart, ChevronUp, ChevronDown, AlertCircle,
-    Clock, Calendar, Zap
+    Clock, Calendar, Zap, RefreshCw
   } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import yahooFinanceService from '../utils/yahooFinanceService';
+import { useData } from '../context/DataContext';
 
 export default function Dashboard() {
-  // Sample data for the performance chart
-  const performanceData = [
-    { name: 'Jan', value: 142000 },
-    { name: 'Feb', value: 143200 },
-    { name: 'Mar', value: 141800 },
-    { name: 'Apr', value: 144500 },
-    { name: 'May', value: 148000 },
-    { name: 'Jun', value: 146500 },
-    { name: 'Jul', value: 149300 },
-    { name: 'Aug', value: 151200 },
-    { name: 'Sep', value: 152800 },
-    { name: 'Oct', value: 155000 },
-    { name: 'Nov', value: 160000 },
-    { name: 'Dec', value: 162500 },
-    { name: 'Jan', value: 165000 },
-    { name: 'Feb', value: 168000 },
-    { name: 'Mar', value: 166000 },
-    { name: 'Apr', value: 168500 },
-    { name: 'May', value: 172000 },
-    { name: 'Jun', value: 170000 },
-    { name: 'Jul', value: 175000 },
-    { name: 'Aug', value: 180000 },
-    { name: 'Sep', value: 179000 },
-    { name: 'Oct', value: 183000 },
-    { name: 'Nov', value: 186000 },
-    { name: 'Dec', value: 188000 },
-    { name: 'Jan', value: 190000 },
-    { name: 'Feb', value: 194000 },
-    { name: 'Mar', value: 192000 },
-    { name: 'Apr', value: 196000 },
-  ];
-  
-  // Daily performance data for the chart when "1D" is selected
-  const dailyData = [
-    { time: '9:30', value: 142200 },
-    { time: '10:00', value: 142650 },
-    { time: '10:30', value: 142400 },
-    { time: '11:00', value: 143100 },
-    { time: '11:30', value: 142900 },
-    { time: '12:00', value: 143300 },
-    { time: '12:30', value: 143100 },
-    { time: '13:00', value: 143600 },
-    { time: '13:30', value: 143800 },
-    { time: '14:00', value: 143750 },
-    { time: '14:30', value: 144100 },
-    { time: '15:00', value: 144600 },
-    { time: '15:30', value: 144800 },
-    { time: '16:00', value: 145200 },
-  ];
+  // Get preloaded data from context
+  const { 
+    marketOverview: contextMarketOverview, 
+    watchlistPerformance: contextWatchlistPerformance,
+    performanceData: contextPerformanceData,
+    dailyData: contextDailyData,
+    weeklyData: contextWeeklyData,
+    isLoading: contextIsLoading,
+    refreshAllData
+  } = useData();
 
-  // Weekly performance data
-  const weeklyData = [
-    { day: 'Mon', value: 140800 },
-    { day: 'Tue', value: 141500 },
-    { day: 'Wed', value: 142900 },
-    { day: 'Thu', value: 143600 },
-    { day: 'Fri', value: 145200 },
-  ];
-
+  // State for chart data - initialized with context data
   const [selectedTimeframe, setSelectedTimeframe] = useState('1D');
-  const [chartData, setChartData] = useState(dailyData);
+  const [chartData, setChartData] = useState(contextDailyData.length > 0 ? contextDailyData : []);
   const [xAxisKey, setXAxisKey] = useState('time');
+  
+  // Use the preloaded data from context
+  const [marketOverview, setMarketOverview] = useState(contextMarketOverview);
+  const [watchlistPerformance, setWatchlistPerformance] = useState(contextWatchlistPerformance);
+  const [performanceData, setPerformanceData] = useState(contextPerformanceData);
+  const [dailyData, setDailyData] = useState(contextDailyData);
+  const [weeklyData, setWeeklyData] = useState(contextWeeklyData);
+  const [isLoading, setIsLoading] = useState(contextIsLoading);
 
+  // Update local state when context data changes
+  useEffect(() => {
+    if (contextMarketOverview) setMarketOverview(contextMarketOverview);
+    if (contextWatchlistPerformance.length > 0) setWatchlistPerformance(contextWatchlistPerformance);
+    if (contextPerformanceData.length > 0) setPerformanceData(contextPerformanceData);
+    if (contextDailyData.length > 0) setDailyData(contextDailyData);
+    if (contextWeeklyData.length > 0) setWeeklyData(contextWeeklyData);
+    setIsLoading(contextIsLoading);
+  }, [
+    contextMarketOverview, 
+    contextWatchlistPerformance, 
+    contextPerformanceData, 
+    contextDailyData, 
+    contextWeeklyData, 
+    contextIsLoading
+  ]);
+
+  // Effect to update chart data based on selected timeframe
   useEffect(() => {
     switch(selectedTimeframe) {
       case '1D':
@@ -81,7 +62,7 @@ export default function Dashboard() {
         setXAxisKey('day');
         break;
       case '1M':
-        setChartData(performanceData.slice(-30));
+        setChartData(performanceData.slice(-6));
         setXAxisKey('name');
         break;
       case '1Y':
@@ -92,22 +73,9 @@ export default function Dashboard() {
         setChartData(dailyData);
         setXAxisKey('time');
     }
-  }, [selectedTimeframe]);
+  }, [selectedTimeframe, dailyData, weeklyData, performanceData]);
 
-  const [marketOverview, setMarketOverview] = useState({
-    dow: { value: 39872.14, change: 0.68, isUp: true },
-    sp500: { value: 5321.42, change: 0.57, isUp: true },
-    nasdaq: { value: 17584.95, change: -0.23, isUp: false },
-    bitcoin: { value: 68345.78, change: 2.46, isUp: true },
-  });
-  
-  const [watchlistPerformance, setWatchlistPerformance] = useState([
-    { name: 'AAPL', price: 175.28, change: 2.3, isUp: true, logo: 'A' },
-    { name: 'MSFT', price: 327.64, change: 3.2, isUp: true, logo: 'M' },
-    { name: 'GOOGL', price: 156.37, change: -1.2, isUp: false, logo: 'G' },
-    { name: 'AMZN', price: 182.49, change: 0.8, isUp: true, logo: 'A' },
-    { name: 'TSLA', price: 892.45, change: 4.8, isUp: true, logo: 'T' }
-  ]);
+  // Market overview and watchlist data are already defined above
 
   const [newsItems, setNewsItems] = useState([
     {
@@ -140,16 +108,37 @@ export default function Dashboard() {
 
   const isWatchlistPositive = totalWatchlistChange > 0;
 
+  // Get current date and time
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+  
+  // Check if market is open (simplified - actual implementation would be more complex)
+  const isMarketOpen = () => {
+    const hours = currentDate.getHours();
+    const minutes = currentDate.getMinutes();
+    const day = currentDate.getDay();
+    
+    // Market is open Monday-Friday, 9:30 AM - 4:00 PM Eastern Time
+    // This is a simplified check - would need timezone adjustments for accuracy
+    return day >= 1 && day <= 5 && 
+           ((hours === 9 && minutes >= 30) || (hours > 9 && hours < 16));
+  };
+
   return (
     <main className="flex-grow py-8 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Welcome Section */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Good morning, Investor</h1>
-            <p className="text-gray-600">Thursday, April 24, 2025 • Market is open</p>
+            <h1 className="text-2xl font-bold text-gray-900">Good {currentDate.getHours() < 12 ? 'morning' : currentDate.getHours() < 18 ? 'afternoon' : 'evening'}, Investor</h1>
+            <p className="text-gray-600">{formattedDate} • Market is {isMarketOpen() ? 'open' : 'closed'}</p>
           </div>
-            <div className="flex space-x-3">
+          <div className="flex space-x-3">
             <button 
                 onClick={() => window.location.href = '/'} 
                 className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 flex items-center shadow-sm hover:bg-gray-50"
@@ -157,16 +146,28 @@ export default function Dashboard() {
              <ArrowLeft className="h-4 w-4 mr-2 text-gray-500" />
                 Back
             </button>
-                <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 flex items-center shadow-sm hover:bg-gray-50">
-                    <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                    Schedule
-                </button>
-                <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg text-sm font-medium text-white flex items-center shadow-sm hover:from-purple-700 hover:to-indigo-700">
-                    <Zap className="h-4 w-4 mr-2" />
-                    Quick Trade
-                </button>
-            </div>
+            <button 
+                onClick={() => refreshAllData()}
+                disabled={isLoading}
+                className={`px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 flex items-center shadow-sm ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+            >
+                <RefreshCw className={`h-4 w-4 mr-2 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
+                {isLoading ? 'Refreshing...' : 'Refresh Data'}
+            </button>
+            <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg text-sm font-medium text-white flex items-center shadow-sm hover:from-purple-700 hover:to-indigo-700">
+                <Zap className="h-4 w-4 mr-2" />
+                Quick Trade
+            </button>
+          </div>
         </div>
+        
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-600"></div>
+            <span className="ml-3 text-gray-600">Loading market data...</span>
+          </div>
+        )}
         
         {/* Market Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

@@ -1,11 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TrendingUp, Shield, PieChart, ArrowRight, User, Filter, LineChart, Search } from 'lucide-react';
 import { Footer } from './FooterSection'; 
-import Navbar from './Navbar';  
+import Navbar from './Navbar';
+import { useData } from '../context/DataContext';
 
 // Your existing HeroSection component
 function HeroSection() {
   const [email, setEmail] = useState('');
+  
+  // Access the data context to trigger preloading
+  const { refreshAllData } = useData();
+  
+  // Trigger data preloading when the hero section loads
+  useEffect(() => {
+    // This will silently preload all the data in the background
+    // so it's ready when the user navigates to the dashboard
+    refreshAllData();
+  }, []);
 
   const features = [
     { icon: <TrendingUp className="h-6 w-6" />, title: "Advanced Screening", description: "Filter through thousands of stocks with customizable parameters" },
