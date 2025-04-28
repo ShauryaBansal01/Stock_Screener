@@ -1,9 +1,21 @@
 import { useState } from 'react';
-import { Search, TrendingUp, BarChart2, BookOpen, Bell, Settings, User, Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, TrendingUp, BarChart2, BookOpen, Bell, Settings, User, Menu, X, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../Auth/AuthContext';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { currentUser, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    const success = await logout();
+    if (success) {
+      navigate('/');
+      setShowUserMenu(false);
+    }
+  };
   
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', active: true, icon: <TrendingUp className="h-4 w-4 mr-1" /> },
@@ -61,10 +73,41 @@ export default function Navbar() {
               <Settings className="h-5 w-5" />
             </button>
             
-            <Link to="/login" className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow flex items-center">
-              <User className="h-4 w-4 mr-1" />
-              Sign In
-            </Link>
+            {isAuthenticated ? (
+              <div className="relative">
+                <button 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-purple-600 transition-colors"
+                >
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center text-white">
+                    {currentUser?.displayName ? currentUser.displayName.charAt(0).toUpperCase() : 
+                     currentUser?.email ? currentUser.email.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
+                  </div>
+                  <span className="font-medium">{currentUser?.displayName || currentUser?.email?.split('@')[0]}</span>
+                </button>
+                
+                {/* User dropdown menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                    <Link to="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</Link>
+                    <Link to="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
+                    <Link to="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
+                    <button 
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to="/login" className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow flex items-center">
+                <User className="h-4 w-4 mr-1" />
+                Sign In
+              </Link>
+            )}
           </div>
           
           {/* Mobile menu button */}
@@ -114,10 +157,32 @@ export default function Navbar() {
                 <span>Settings</span>
               </button>
               
-              <Link to="/login" className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow flex items-center justify-center">
-                <User className="h-4 w-4 mr-2" />
-                <span>Sign In</span>
-              </Link>
+              {isAuthenticated ? (
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 px-4 py-2 text-gray-700">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center text-white">
+                      {currentUser?.displayName ? currentUser.displayName.charAt(0).toUpperCase() : 
+                       currentUser?.email ? currentUser.email.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
+                    </div>
+                    <span className="font-medium">{currentUser?.displayName || currentUser?.email?.split('@')[0]}</span>
+                  </div>
+                  
+                  <Link to="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
+                  
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow flex items-center justify-center">
+                  <User className="h-4 w-4 mr-2" />
+                  <span>Sign In</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>

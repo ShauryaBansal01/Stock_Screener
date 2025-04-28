@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HeroSection from './components/HeroSection';
 import Dashboard from './pages/Dashboard';
 import Screener from './pages/Screener';
@@ -7,23 +7,60 @@ import WatchList from './pages/Watchlist';
 import Login from './components/Auth/Login';
 import GlobalStockNewsApp from './pages/alert';
 import Signup from './components/Auth/Signup';
+import { AuthProvider } from './Auth/AuthContext';
+import ProtectedRoute from './Auth/ProtectedRoute';
 
 const App = () => {
   return (
-    <Router>
-      <div>
-        <Routes>
-          <Route path="/" element={<HeroSection />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/screener" element={<Screener/>} />
-          <Route path="/watchlist" element={<WatchList/>} />
-          <Route path="/alert" element={<GlobalStockNewsApp/>} />
-          <Route path="/login" element={<Login/>} />
-          <Route path="/signup" element={<Signup/>} />
-
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<HeroSection />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            {/* Protected routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/screener" 
+              element={
+                <ProtectedRoute>
+                  <Screener />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/watchlist" 
+              element={
+                <ProtectedRoute>
+                  <WatchList />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/alert" 
+              element={
+                <ProtectedRoute>
+                  <GlobalStockNewsApp />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 };
 
